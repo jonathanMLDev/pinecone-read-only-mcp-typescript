@@ -163,7 +163,7 @@ async function test() {
         `⚠️  Keyword search skipped: sparse index has no namespaces (or index unavailable).`
       );
       console.log(
-        `   Ensure PINECONE_SPARSE_INDEX_NAME (e.g. pinecone-rag-sparse or rag-hybrid-sparse) exists and has data.`
+        `   Ensure the sparse index (e.g. rag-hybrid-sparse) exists and has data.`
       );
     } else {
       const sparseTestNamespace = sparseNamespaces[0].namespace;
@@ -191,7 +191,7 @@ async function test() {
           `⚠️  Keyword search skipped: ${kwError instanceof Error ? kwError.message : String(kwError)}`
         );
         console.log(
-          `   Ensure PINECONE_SPARSE_INDEX_NAME exists and namespace "${sparseTestNamespace}" has data.`
+          `   Ensure the sparse index exists and namespace "${sparseTestNamespace}" has data.`
         );
       }
     }

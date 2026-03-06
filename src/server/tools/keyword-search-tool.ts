@@ -84,7 +84,7 @@ export function registerKeywordSearchTool(server: McpServer): void {
     'keyword_search',
     {
       description:
-        'Keyword (lexical/sparse-only) search over the Pinecone sparse index (e.g. pinecone-rag-sparse). ' +
+        'Keyword (lexical/sparse-only) search over the Pinecone sparse index (default: rag-hybrid-sparse). ' +
         'Use for exact or keyword-style queries. Does not use semantic reranking. ' +
         'Call list_namespaces first to discover namespaces; suggest_query_params is optional.',
       inputSchema: {

@@ -8,8 +8,6 @@ export type PineconeMetadataValue = string | number | boolean | string[];
 export interface PineconeClientConfig {
   apiKey: string;
   indexName?: string;
-  /** Dedicated sparse index for keyword_search tool (e.g. pinecone-rag-sparse). */
-  sparseIndexName?: string;
   rerankModel?: string;
   defaultTopK?: number;
 }
