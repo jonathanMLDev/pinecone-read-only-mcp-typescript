@@ -12,20 +12,20 @@ const packageJsonPath = join(__dirname, '..', 'package.json');
 
 /**
  * Read `version` from package.json text (same rules as the live server).
- * On invalid JSON, missing `version`, or invalid type, logs and returns {@link DEFAULT_SERVER_VERSION}.
+ * On invalid JSON, missing `version`, or invalid type, writes to stderr and returns {@link DEFAULT_SERVER_VERSION}.
  */
 export function parsePackageJsonVersion(raw: string, pathForErrors = 'package.json'): string {
   try {
     const parsed = JSON.parse(raw) as { version?: unknown };
     if (typeof parsed.version !== 'string') {
-      console.log(
+      console.error(
         `[server-version] invalid or missing "version" in ${pathForErrors}; using default ${DEFAULT_SERVER_VERSION}`
       );
       return DEFAULT_SERVER_VERSION;
     }
     const version = parsed.version.trim();
     if (version.length === 0) {
-      console.log(
+      console.error(
         `[server-version] empty "version" in ${pathForErrors}; using default ${DEFAULT_SERVER_VERSION}`
       );
       return DEFAULT_SERVER_VERSION;
@@ -33,7 +33,7 @@ export function parsePackageJsonVersion(raw: string, pathForErrors = 'package.js
     return version;
   } catch (err) {
     const detail = err instanceof Error ? err.message : String(err);
-    console.log(
+    console.error(
       `[server-version] could not parse ${pathForErrors} (${detail}); using default ${DEFAULT_SERVER_VERSION}`
     );
     return DEFAULT_SERVER_VERSION;
@@ -49,7 +49,7 @@ export function parsePackageJsonVersion(raw: string, pathForErrors = 'package.js
 export function resolveServerVersion(overridePath?: string): string {
   const packagePath = overridePath ?? packageJsonPath;
   if (!existsSync(packagePath)) {
-    console.log(
+    console.error(
       `[server-version] package.json not found at ${packagePath}; using default ${DEFAULT_SERVER_VERSION}`
     );
     return DEFAULT_SERVER_VERSION;
@@ -59,7 +59,7 @@ export function resolveServerVersion(overridePath?: string): string {
     return parsePackageJsonVersion(raw, packagePath);
   } catch (err) {
     const detail = err instanceof Error ? err.message : String(err);
-    console.log(
+    console.error(
       `[server-version] could not read ${packagePath} (${detail}); using default ${DEFAULT_SERVER_VERSION}`
     );
     return DEFAULT_SERVER_VERSION;

@@ -39,22 +39,22 @@ describe('parsePackageJsonVersion', () => {
   });
 
   it('returns default when version is only whitespace', () => {
-    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    const errSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     try {
       expect(parsePackageJsonVersion(JSON.stringify({ version: '   ' }))).toBe('0.0.1');
-      expect(logSpy).toHaveBeenCalled();
+      expect(errSpy).toHaveBeenCalled();
     } finally {
-      logSpy.mockRestore();
+      errSpy.mockRestore();
     }
   });
 
   it('returns default when version is not a string', () => {
-    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    const errSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     try {
       expect(parsePackageJsonVersion(JSON.stringify({ version: 1 }))).toBe('0.0.1');
-      expect(logSpy).toHaveBeenCalled();
+      expect(errSpy).toHaveBeenCalled();
     } finally {
-      logSpy.mockRestore();
+      errSpy.mockRestore();
     }
   });
 });
@@ -84,12 +84,12 @@ describe('SERVER_VERSION', () => {
 describe('resolveServerVersion', () => {
   it('returns default version when package manifest path does not exist', () => {
     const missing = join(tmpdir(), `no-package-json-${Date.now()}.json`);
-    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    const errSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     try {
       expect(resolveServerVersion(missing)).toBe('0.0.1');
-      expect(logSpy).toHaveBeenCalled();
+      expect(errSpy).toHaveBeenCalled();
     } finally {
-      logSpy.mockRestore();
+      errSpy.mockRestore();
     }
   });
 
@@ -97,12 +97,12 @@ describe('resolveServerVersion', () => {
     const missing = join(tmpdir(), `no-package-json-env-${Date.now()}.json`);
     const prev = process.env.npm_package_version;
     process.env.npm_package_version = '9.9.9-test';
-    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    const errSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     try {
       expect(resolveServerVersion(missing)).toBe('0.0.1');
-      expect(logSpy).toHaveBeenCalled();
+      expect(errSpy).toHaveBeenCalled();
     } finally {
-      logSpy.mockRestore();
+      errSpy.mockRestore();
       if (prev !== undefined) process.env.npm_package_version = prev;
       else delete process.env.npm_package_version;
     }
