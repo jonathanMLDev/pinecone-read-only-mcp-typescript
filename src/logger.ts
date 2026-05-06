@@ -51,21 +51,16 @@ function shouldLog(level: LogLevel): boolean {
 /**
  * Pinecone API keys are typically UUID-like strings. We mask anything that
  * looks like a key (`xxxxxxxx-xxxx-...`) plus tokens marked with `apiKey`,
- * `api_key`, or `Authorization: Bearer ...`. The intent is defence in
- * depth: callers should already be careful, this is the last guard.
+ * `api_key`, or `Authorization: Bearer ...`.
  */
-const API_KEY_PATTERNS: RegExp[] = [
-  /[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/g,
-  /(api[_-]?key["':\s=]+)([^\s"',}]+)/gi,
-  /(Authorization:\s*Bearer\s+)([^\s"',}]+)/gi,
-];
-
 /** Replace API-key-shaped substrings in `s` with `***`. Idempotent and safe to call on any string. */
 export function redactApiKey(s: string): string {
-  let out = s;
-  for (const re of API_KEY_PATTERNS) {
-    out = out.replace(re, (_match, prefix?: string) => (prefix ? `${prefix}***` : '***'));
-  }
+  let out = s.replace(
+    /[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/g,
+    '***'
+  );
+  out = out.replace(/(api[_-]?key["':\s=]+)([^\s"',}]+)/gi, '$1***');
+  out = out.replace(/(Authorization:\s*Bearer\s+)([^\s"',}]+)/gi, '$1***');
   return out;
 }
 

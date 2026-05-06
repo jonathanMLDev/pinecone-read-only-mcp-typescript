@@ -117,6 +117,11 @@ export interface QueryResultRowShape {
   metadata?: Record<string, PineconeMetadataValue>;
 }
 
+/** Outcome of listing namespaces on the sparse (keyword) index. */
+export type KeywordIndexNamespacesResult =
+  | { ok: true; namespaces: Array<{ namespace: string; recordCount: number }> }
+  | { ok: false; error: string };
+
 export interface QueryResponse {
   status: 'success' | 'error';
   mode?: 'query' | 'query_fast' | 'query_detailed';

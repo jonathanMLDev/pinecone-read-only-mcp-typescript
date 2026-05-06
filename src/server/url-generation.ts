@@ -28,7 +28,7 @@ export type UrlGenerationResult = {
  */
 export type UrlGenerator = (metadata: Record<string, unknown>) => UrlGenerationResult;
 
-/** Registry of namespace -> URL generator. Built-ins are registered below; more can be added at runtime. */
+/** Registry of namespace -> URL generator. Built-ins register via {@link registerBuiltinUrlGenerators}. */
 const urlGenerators = new Map<string, UrlGenerator>();
 
 /** Return a trimmed non-empty string or null for empty/missing values. */
@@ -92,8 +92,19 @@ function generatorSlackCpplang(metadata: Record<string, unknown>): UrlGeneration
   };
 }
 
-urlGenerators.set('mailing', generatorMailing);
-urlGenerators.set('slack-Cpplang', generatorSlackCpplang);
+let builtinGeneratorsRegistered = false;
+
+/**
+ * Register built-in generators (`mailing`, `slack-Cpplang`). Idempotent.
+ * Invoked from {@link setupServer} so embedders get the same defaults as the CLI;
+ * pure library use without calling `setupServer` should register explicitly if needed.
+ */
+export function registerBuiltinUrlGenerators(): void {
+  if (builtinGeneratorsRegistered) return;
+  builtinGeneratorsRegistered = true;
+  urlGenerators.set('mailing', generatorMailing);
+  urlGenerators.set('slack-Cpplang', generatorSlackCpplang);
+}
 
 /**
  * Register a URL generator for a namespace, replacing any existing entry.

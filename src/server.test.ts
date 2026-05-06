@@ -67,7 +67,14 @@ describe('validateMetadataFilter', () => {
       year: { $regex: '^202' },
     });
 
-    expect(result).toContain('Unsupported filter operator');
+    expect(result).toContain('Unknown filter operator');
+  });
+
+  it('accepts numeric arrays for $in', () => {
+    const result = validateMetadataFilter({
+      year: { $in: [2023, 2024] },
+    });
+    expect(result).toBeNull();
   });
 
   it('rejects non-array values for $in/$nin', () => {

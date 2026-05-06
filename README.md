@@ -27,8 +27,8 @@ A Model Context Protocol (MCP) server that provides semantic search over Pinecon
 - **Semantic Reranking**: Uses BGE reranker model for improved precision
 - **Dynamic Namespace Discovery**: Automatically discovers available namespaces in your Pinecone index
 - **Metadata Filtering**: Supports optional metadata filters for refined searches
-- **Fast & Optimized**: Lazy initialization, connection pooling, and efficient result merging
-- **Production Ready**: Input validation, error handling, and configurable logging
+- **Fast presets**: Lazy initialization, connection pooling, and efficient result merging; use the `query` tool `preset=fast` / `detailed` to trade latency vs quality (no published benchmarks yet — treat descriptions as qualitative).
+- **Production-oriented defaults**: Input validation, error handling, and configurable logging (semantic versioning is pre-1.0 — review CHANGELOG before upgrading).
 - **TypeScript Support**: Full TypeScript support with type definitions
 
 ## Installation
@@ -81,6 +81,10 @@ Quick reference:
 | `PINECONE_READ_ONLY_MCP_LOG_FORMAT` | No | `text` (`json` for log pipelines) |
 
 Run `pinecone-read-only-mcp --help` for CLI equivalents (`--cache-ttl-seconds`, `--request-timeout-ms`, `--disable-suggest-flow`, etc.).
+
+### Deployment model
+
+The server uses **process-global** memory for the suggest-flow gate (`suggest_query_params` context), namespaces cache, URL generator registry, and active configuration. **Stdio MCP (one client per Node process)** matches this model. If you embed `setupServer` behind a multi-tenant HTTP transport, isolate those structures per session yourself or treat the suggest-flow guard as best-effort only.
 
 ### Claude Desktop Configuration
 
@@ -254,7 +258,7 @@ Discovers and lists all available namespaces in the configured Pinecone index, i
 
 ### `suggest_query_params`
 
-Suggests which **fields** to request and which tool to use (`count`, `query_fast`, or `query_detailed`), based on the namespace’s schema (from `list_namespaces`) and the user’s natural language query. This is a mandatory flow step before `count`/`query` tools.
+Suggests which **fields** to request and which path to use (`count`, or hybrid query as **fast** vs **detailed** — implemented via the `query` tool `preset` argument), based on the namespace’s schema (from `list_namespaces`) and the user’s natural language query. This is a mandatory flow step before `count` / `query` tools.
 
 **Parameters:**
 
@@ -286,7 +290,7 @@ Single orchestrator tool that runs the full flow in one call:
 
 1. namespace routing (if namespace is omitted),
 2. query param suggestion,
-3. execution via `count`, `query_fast`, or `query_detailed`.
+3. execution via `count` or hybrid `query` (fast vs detailed behavior).
 
 It returns both the final result and a `decision_trace` for transparency.
 
@@ -298,7 +302,7 @@ It returns both the final result and a `decision_trace` for transparency.
 | `namespace`       | string  | No       | -       | Optional explicit namespace                                                         |
 | `metadata_filter` | object  | No       | -       | Optional metadata filter                                                            |
 | `top_k`           | integer | No       | `10`    | Query result size for query paths (1-100)                                           |
-| `preferred_tool`  | enum    | No       | `auto`  | One of `auto`, `count`, `query_fast`, `query_detailed`                              |
+| `preferred_tool`  | enum    | No       | `auto`  | One of `auto`, `count`, `fast`, `detailed`                                          |
 | `enrich_urls`     | boolean | No       | `true`  | Auto-generate URLs for `mailing` and `slack-Cpplang` when `metadata.url` is missing |
 
 **Returns:** JSON containing `decision_trace` and `result`.

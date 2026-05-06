@@ -34,7 +34,7 @@ export const QUERY_DOCUMENTS_MAX_CHUNKS = 500;
 export const SERVER_NAME = 'Pinecone Read-Only MCP';
 export { SERVER_VERSION } from './server-version.js';
 
-export const SERVER_INSTRUCTIONS = `Quickstart for AI clients: for most user questions, call \`guided_query\` with the user's question — it does namespace routing, suggestion, and execution in one shot and returns a decision_trace you can show the user. For manual flows, call \`list_namespaces\` -> \`suggest_query_params\` -> \`query_fast\` / \`query_detailed\` / \`count\` (the suggest step is a mandatory gate). Use \`query_documents\` for full-document reading, \`keyword_search\` for exact-keyword retrieval against the sparse index, and \`generate_urls\` when records need URLs synthesized from metadata.
+export const SERVER_INSTRUCTIONS = `Quickstart for AI clients: for most user questions, call \`guided_query\` with the user's question — it does namespace routing, suggestion, and execution in one shot and returns a decision_trace you can show the user. For manual flows, call \`list_namespaces\` -> \`suggest_query_params\` -> \`query\` (use preset fast/detailed/full per suggestion) or \`count\` (the suggest step is a mandatory gate). Use \`query_documents\` for full-document reading, \`keyword_search\` for exact-keyword retrieval against the sparse index, and \`generate_urls\` when records need URLs synthesized from metadata.
 
 A semantic search server that provides hybrid search capabilities over Pinecone vector indexes with automatic namespace discovery.
 
@@ -53,7 +53,7 @@ Usage:
 1. Use list_namespaces (cached) to discover available namespaces in the index. The response includes \`expires_at_iso\` so you know when to refresh.
 2. Optionally use namespace_router to choose candidate namespace(s) from user intent.
 3. Call suggest_query_params before query/count/query_documents tools (mandatory flow gate) to get suggested_fields and recommended_tool.
-4. Use count for count questions, query_fast/query_detailed for chunk-level retrieval, or query_documents for full-document content.
+4. Use count for count questions, \`query\` with the appropriate preset for chunk-level retrieval, or query_documents for full-document content.
 
 Notes:
 - Result rows include both \`document_id\` (canonical) and \`paper_number\` (deprecated alias kept for one minor cycle; will be removed in the next major release). Prefer \`document_id\` in new code.

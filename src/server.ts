@@ -10,7 +10,8 @@
  * - {@link resolveConfig} — merge CLI-style overrides with `process.env`.
  * - {@link setPineconeClient} — inject a client instance before `setupServer()`.
  * - {@link registerUrlGenerator} / {@link unregisterUrlGenerator} — extend URL synthesis.
- * - {@link withRetry} / {@link withTimeout} — resilience helpers (re-exported for apps).
+ * - Built-in `mailing` / `slack-Cpplang` URL generators are registered from {@link setupServer}
+ *   via {@link registerBuiltinUrlGenerators}; call it yourself if you use the library without `setupServer`.
  *
  * The CLI binary (`pinecone-read-only-mcp`) lives in `dist/index.js` and is not
  * exported from this module.
@@ -20,6 +21,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { SERVER_INSTRUCTIONS, SERVER_NAME, SERVER_VERSION } from './constants.js';
 import type { ServerConfig } from './config.js';
 import { setServerConfig } from './server/config-context.js';
+import { registerBuiltinUrlGenerators } from './server/url-generation.js';
 import { registerCountTool } from './server/tools/count-tool.js';
 import { registerGuidedQueryTool } from './server/tools/guided-query-tool.js';
 import { registerGenerateUrlsTool } from './server/tools/generate-urls-tool.js';
@@ -42,11 +44,9 @@ export {
   unregisterUrlGenerator,
   generateUrlForNamespace,
   hasUrlGenerator,
+  registerBuiltinUrlGenerators,
 } from './server/url-generation.js';
 export type { UrlGenerationResult, UrlGenerator } from './server/url-generation.js';
-/** Bounded retry + Promise.race timeout helpers used by `PineconeClient`. */
-export { withRetry, withTimeout } from './server/retry.js';
-export type { RetryOptions, TimeoutOptions } from './server/retry.js';
 /** Build {@link ServerConfig} from CLI overrides + environment variables. */
 export { resolveConfig } from './config.js';
 export type { ServerConfig, LogLevel, LogFormat, ConfigOverrides } from './config.js';
@@ -62,15 +62,16 @@ export type {
   PineconeMetadataValue,
   QueryResponse,
   QueryResultRowShape,
+  KeywordIndexNamespacesResult,
 } from './types.js';
 
 /**
  * Create and configure the MCP server with all tools.
  *
- * The optional `config` argument lets library consumers thread runtime
- * settings (cache TTL, log format, suggest-flow gate) through the server
- * without touching environment variables. When omitted, defaults from
- * `getServerConfig()` are used so existing CLI callers keep working.
+ * Process-global state (one MCP client per Node process is assumed):
+ * suggest-flow gate (`stateByNamespace`), namespaces cache, URL generator registry,
+ * and {@link setServerConfig} — see README “Deployment model”. Multi-tenant HTTP
+ * multiplexing can violate the suggest-flow guarantee unless you isolate by session.
  *
  * @returns the configured `McpServer` instance, ready to connect to a transport.
  */
@@ -78,6 +79,8 @@ export async function setupServer(config?: ServerConfig): Promise<McpServer> {
   if (config) {
     setServerConfig(config);
   }
+
+  registerBuiltinUrlGenerators();
 
   const server = new McpServer(
     {

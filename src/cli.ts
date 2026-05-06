@@ -3,11 +3,7 @@
  * for {@link resolveConfig}; environment variables remain the fallback there.
  */
 
-import {
-  DEFAULT_INDEX_NAME,
-  DEFAULT_RERANK_MODEL,
-  SERVER_VERSION,
-} from './constants.js';
+import { DEFAULT_INDEX_NAME, DEFAULT_RERANK_MODEL, SERVER_VERSION } from './constants.js';
 import type { ConfigOverrides } from './config.js';
 
 export type ParseCliResult =

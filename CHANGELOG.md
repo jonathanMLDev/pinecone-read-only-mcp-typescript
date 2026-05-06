@@ -10,6 +10,9 @@ Future releases are managed automatically by [release-please](https://github.com
 
 ### Added
 
+- `registerBuiltinUrlGenerators()` for built-in URL generators; `setupServer()` invokes it so CLI/library parity stays default.
+- Discriminated result type for `listNamespacesFromKeywordIndex()` (`KeywordIndexNamespacesResult`).
+- Unit tests for `withRetry` / `withTimeout` in `src/server/retry.test.ts`.
 - `SERVER_VERSION` is now read from `package.json` at runtime so MCP `serverInfo` always matches the published package version.
 - `--version` CLI flag prints the package version and exits.
 - `list_namespaces` response now includes `expires_at_iso` so clients see the cache expiry as an ISO-8601 timestamp without converting `cache_ttl_seconds`.
@@ -22,6 +25,13 @@ Future releases are managed automatically by [release-please](https://github.com
 
 ### Changed
 
+- **Breaking (MCP):** Single hybrid `query` tool with `preset` (`fast` | `detailed` | `full`); removed separate `query_fast` / `query_detailed` tool registrations.
+- **Breaking (library):** Stopped re-exporting `withRetry` / `withTimeout` from the package entry (`server.ts`).
+- `withTimeout` aborts an internal `AbortSignal` on deadline (cooperative cancellation).
+- `PineconeClient`: shared hit-field extraction, safer merge dedup without empty `_id` collisions, metadata sampling skips zero-vector probe when dimension is unknown, `listNamespacesFromKeywordIndex` surfaces errors via `{ ok: false }`.
+- Metadata filter manual validation accepts primitive arrays for `$in`/`$nin` including numbers (matches Zod).
+- README: deployment model for process-global gate/cache/registry; adjusted feature wording vs pre-1.0 semver.
+- `.npmignore` no longer excludes `dist/` (still shipped via `package.json` `files`).
 - `.env.example` log-level options corrected to the four levels actually supported (`DEBUG`, `INFO`, `WARN`, `ERROR`); the stale `WARNING`/`CRITICAL` values are gone.
 - README Slack URL example now matches the generator output (`https://app.slack.com/client/{team_id}/{channel_id}/p{messageId}`).
 - README "Comparison with Python Version" no longer claims an identical API interface; the new TypeScript-only tools (`guided_query`, `query_documents`, `keyword_search`, `namespace_router`, `suggest_query_params`, `count`, `generate_urls`) are listed explicitly.
