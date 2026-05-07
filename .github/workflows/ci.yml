@@ -42,10 +42,13 @@ jobs:
       - name: Smoke test CLI
         run: node dist/index.js --help
 
+      # @vitest/coverage-v8 imports node:inspector/promises (Node 19+). Keep 18.x in the matrix for runtime smoke but skip coverage there.
       - name: Run tests with coverage
+        if: matrix.node-version != '18.x'
         run: npm run test:coverage
 
-      - name: Run tests (no coverage)
+      - name: Run tests (Node 18, no coverage)
+        if: matrix.node-version == '18.x'
         run: npm test
 
       - name: Generate CycloneDX SBOM (lockfile-based)

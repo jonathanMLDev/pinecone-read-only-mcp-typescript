@@ -36,6 +36,7 @@ Future releases are managed automatically by [release-please](https://github.com
 - README Slack URL example now matches the generator output (`https://app.slack.com/client/{team_id}/{channel_id}/p{messageId}`).
 - README "Comparison with Python Version" no longer claims an identical API interface; the new TypeScript-only tools (`guided_query`, `query_documents`, `keyword_search`, `namespace_router`, `suggest_query_params`, `count`, `generate_urls`) are listed explicitly.
 - `npm run ci` now runs `test:coverage` so merges are gated on coverage thresholds.
+- CI: on Node **18.x**, run `npm test` only; **`test:coverage`** runs on **20.x** / **22.x** because Vitest V8 coverage uses `node:inspector/promises` (Node **≥19**).
 - Dependabot groups related **vitest**, **typescript-eslint**, and **eslint/prettier** updates.
 
 
