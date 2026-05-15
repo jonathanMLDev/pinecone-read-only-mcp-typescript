@@ -10,6 +10,7 @@ Tagged releases are published to npm from GitHub Actions when a **GitHub Release
 
 ### Added
 
+- `UrlGeneratorFn` type alias (same as `UrlGenerator`) and `RegisterBuiltinUrlGeneratorsOptions` with `reinstallBuiltins` on `registerBuiltinUrlGenerators()` to restore default `mailing` / `slack-Cpplang` generators after overrides; README “Custom URL generators” section and tests for custom registration and built-in override.
 - Zod `toolErrorSchema` and exported types `ToolError` / `ToolErrorCode` for parsing MCP tool failures; all tools now return this JSON shape in the text content when `isError` is true.
 - `validateMetadataFilterDetailed()` returns `{ message, field }` for invalid filters; `validateMetadataFilter()` remains a string-only wrapper for backward compatibility.
 - `.coderabbit.yaml` sets the pre-merge **docstring coverage** threshold to **79%** (default **80%**) so marginal documentation-only gaps do not block merges; adjust upward as coverage improves.
