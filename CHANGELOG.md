@@ -21,9 +21,10 @@ Tagged releases are published to npm from GitHub Actions when a **GitHub Release
 - `--version` CLI flag prints the package version and exits.
 - `list_namespaces` response now includes `expires_at_iso` so clients see the cache expiry as an ISO-8601 timestamp without converting `cache_ttl_seconds`.
 - `examples/README.md` describing the library embedding sample.
-- GitHub Actions **CI** matrix across **ubuntu-latest**, **windows-latest**, and **macos-latest**, each with **Node.js** **20.x** and **22.x**: typecheck, lint, Prettier, build, `test:coverage`, **CycloneDX** SBOM artifact upload (per job), **Codecov** upload (**Ubuntu** + Node **20.x** only), plus a separate **quality** job (`npm audit`, `npm pack --dry-run`).
-- `npm run test:coverage` with Vitest coverage thresholds (see `vitest.config.ts`).
+- GitHub Actions **CI** matrix across **ubuntu-latest**, **windows-latest**, and **macos-latest**, each with **Node.js** **20.x** and **22.x**: typecheck, lint, Prettier, build, `test:coverage`, **CycloneDX** SBOM artifact upload (per job), **Codecov** upload (**Ubuntu** + Node **20.x** only), plus a separate **quality** job (`npm audit`, `npm pack --dry-run`, **markdown-link-check** on README/CHANGELOG/docs).
+- Vitest **global** coverage thresholds in `vitest.config.ts` (lines 73%, statements 72%, branches 58%, functions 76% — measured baseline minus slack); `npm run test:coverage` exits non-zero when any bucket regresses.
 - `@vitest/coverage-v8` devDependency for coverage reports (`lcov`, `json-summary`, HTML).
+- `docs/` reference set (TOOLS, CONFIGURATION, SECURITY, CONTRIBUTING, CI_CD, FAQ, MIGRATION, RELEASING) and worked examples `examples/suggest-flow-demo.ts`, `examples/guided-query-demo.ts`, `examples/library-embedding-demo.ts`.
 
 ### Changed
 
@@ -40,7 +41,7 @@ Tagged releases are published to npm from GitHub Actions when a **GitHub Release
 - `.env.example` log-level options corrected to the four levels actually supported (`DEBUG`, `INFO`, `WARN`, `ERROR`); the stale `WARNING`/`CRITICAL` values are gone.
 - README Slack URL example now matches the generator output (`https://app.slack.com/client/{team_id}/{channel_id}/p{messageId}`).
 - README "Comparison with Python Version" no longer claims an identical API; the new TypeScript-only tools (`guided_query`, `query_documents`, `keyword_search`, `namespace_router`, `suggest_query_params`, `count`, `generate_urls`) are listed explicitly.
-- `npm run ci` now runs `test:coverage` so merges are gated on coverage thresholds.
+- CI **quality** job: `npm run docs:link-check` runs `markdown-link-check` in a single `npx` invocation over `README.md`, `CHANGELOG.md`, and all `docs/**/*.md` (via `scripts/docs-link-check.mjs`) instead of one `npx` per file under `docs/`.
 - **Breaking (runtime / tooling):** `engines.node` is now **>=20.12.0**. Vitest **4** (bundled **rolldown**) imports `util.styleText` from `node:util` (added in Node **20.12**), and **`@vitest/coverage-v8`** uses `node:inspector/promises` (Node **≥19**). CI tests only **20.x** and **22.x**.
 - Dependabot groups related **vitest**, **typescript-eslint**, and **eslint/prettier** updates.
 
@@ -89,7 +90,7 @@ details. Newer shipped changes are recorded in this changelog by version.
 - Environment variable support
 - Full documentation and examples
 
-[Unreleased]: https://github.com/CppDigest/pinecone-read-only-mcp-typescript/compare/v0.1.6...HEAD
-[0.1.6]: https://github.com/CppDigest/pinecone-read-only-mcp-typescript/compare/v0.1.1...v0.1.6
-[0.1.1]: https://github.com/CppDigest/pinecone-read-only-mcp-typescript/compare/v0.1.0...v0.1.1
-[0.1.0]: https://github.com/CppDigest/pinecone-read-only-mcp-typescript/releases/tag/v0.1.0
+[Unreleased]: https://github.com/cppalliance/pinecone-read-only-mcp-typescript/compare/v0.1.6...HEAD
+[0.1.6]: https://github.com/cppalliance/pinecone-read-only-mcp-typescript/compare/v0.1.1...v0.1.6
+[0.1.1]: https://github.com/cppalliance/pinecone-read-only-mcp-typescript/compare/v0.1.0...v0.1.1
+[0.1.0]: https://github.com/cppalliance/pinecone-read-only-mcp-typescript/releases/tag/v0.1.0

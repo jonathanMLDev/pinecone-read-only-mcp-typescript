@@ -84,3 +84,6 @@ jobs:
 
       - name: Package dry run
         run: npm pack --dry-run
+
+      - name: Verify internal markdown links
+        run: npm run docs:link-check
