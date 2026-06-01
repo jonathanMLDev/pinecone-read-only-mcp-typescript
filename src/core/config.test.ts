@@ -31,7 +31,7 @@ describe('resolveConfig', () => {
   });
 
   it('uses indexName from overrides when set', () => {
-    const cfg = resolveConfig({ apiKey: 'sk-test', indexName: 'override-index' });
+    const cfg = resolveConfig({ apiKey: 'sk-test', indexName: 'override-index' }, {});
     expect(cfg.indexName).toBe('override-index');
     expect(cfg.sparseIndexName).toBe('override-index-sparse');
   });

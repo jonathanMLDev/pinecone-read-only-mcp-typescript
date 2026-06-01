@@ -12,12 +12,8 @@
  * (tests). For isolated tenants in production, prefer one server per Node process.
  */
 
-import {
-  PineconeClient,
-  resolveConfig,
-  setPineconeClient,
-} from '@will-cppa/pinecone-read-only-mcp';
-import { setupAllianceServer } from '@will-cppa/pinecone-read-only-mcp/alliance';
+import { PineconeClient, setPineconeClient } from '@will-cppa/pinecone-read-only-mcp';
+import { resolveAllianceConfig, setupAllianceServer } from '@will-cppa/pinecone-read-only-mcp/alliance';
 
 async function main(): Promise<void> {
   const apiKey = process.env['PINECONE_API_KEY']?.trim();
@@ -27,12 +23,7 @@ async function main(): Promise<void> {
     );
     return;
   }
-  const indexName = process.env['PINECONE_INDEX_NAME']?.trim();
-  if (!indexName) {
-    console.log('Set PINECONE_INDEX_NAME to run this example. Skipping live setup in doc-only mode.');
-    return;
-  }
-  const config = resolveConfig({ apiKey, indexName });
+  const config = resolveAllianceConfig({ apiKey });
 
   setPineconeClient(
     new PineconeClient({

@@ -27,9 +27,12 @@ export function resolveAllianceConfig(
   env: NodeJS.ProcessEnv = process.env
 ): ServerConfig {
   const indexName =
-    trimOptional(overrides.indexName ?? env['PINECONE_INDEX_NAME']) ?? ALLIANCE_DEFAULT_INDEX_NAME;
+    trimOptional(overrides.indexName) ??
+    trimOptional(env['PINECONE_INDEX_NAME']) ??
+    ALLIANCE_DEFAULT_INDEX_NAME;
   const rerankModel =
-    trimOptional(overrides.rerankModel ?? env['PINECONE_RERANK_MODEL']) ??
+    trimOptional(overrides.rerankModel) ??
+    trimOptional(env['PINECONE_RERANK_MODEL']) ??
     ALLIANCE_DEFAULT_RERANK_MODEL;
   return resolveConfig({ ...overrides, indexName, rerankModel }, env);
 }
