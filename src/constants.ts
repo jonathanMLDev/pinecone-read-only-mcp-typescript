@@ -64,7 +64,7 @@ export const ALLIANCE_INSTRUCTIONS_APPENDIX = `
 
 Alliance quickstart: for most user questions, call \`guided_query\` with the user's question — it does namespace routing, suggestion, and execution in one shot and returns a decision_trace you can show the user. The Alliance CLI and \`resolveAllianceConfig\` default the index to \`rag-hybrid\` (and rerank to \`bge-reranker-v2-m3\`) when those env vars are omitted.
 
-For manual flows with the full tool surface, call \`list_namespaces\` -> \`suggest_query_params\` -> \`query\` (use preset fast/detailed/full per suggestion) or \`count\` (the suggest step is a mandatory gate unless PINECONE_DISABLE_SUGGEST_FLOW is set).
+For manual flows with the full tool surface, call \`list_namespaces\` -> \`suggest_query_params\` -> \`query\` (use preset fast/detailed/full per suggestion) or \`count\` (the suggest step is a mandatory gate unless \`PINECONE_DISABLE_SUGGEST_FLOW=true\`).
 
 Alliance usage (after list_namespaces):
 3. Call suggest_query_params before query/count/query_documents tools (mandatory flow gate) to get suggested_fields and recommended_tool.
