@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { resolveConfig } from '../config.js';
 import { PineconeClient } from '../pinecone-client.js';
+import { resolveTestConfig } from './tools/test-helpers.js';
 import {
   ServerContext,
   createServer,
@@ -14,11 +14,7 @@ describe('ServerContext', () => {
     teardownDefaultServerContext();
   });
 
-  const testConfig = () =>
-    resolveConfig({
-      apiKey: 'sk-test',
-      indexName: 'test-index',
-    });
+  const testConfig = () => resolveTestConfig();
 
   it('lazy-builds Pinecone client on first getClient()', () => {
     const ctx = new ServerContext(testConfig());
