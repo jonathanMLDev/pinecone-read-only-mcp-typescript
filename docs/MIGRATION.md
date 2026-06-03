@@ -33,7 +33,7 @@ Module-level helpers (`getPineconeClient`, `registerUrlGenerator`, `requireSugge
 **New (opt-in instance path):**
 
 ```ts
-import { createServer, ServerContext } from '@will-cppa/pinecone-read-only-mcp';
+import { createServer, PineconeClient } from '@will-cppa/pinecone-read-only-mcp';
 import {
   resolveAllianceConfig,
   setupAllianceServer,
@@ -43,7 +43,12 @@ const config = resolveAllianceConfig({ apiKey: process.env.PINECONE_API_KEY! });
 const ctx = createServer(config); // installs process-default + returns instance
 ctx.setClient(
   new PineconeClient({
-    /* same fields as config */
+    apiKey: config.apiKey,
+    indexName: config.indexName,
+    sparseIndexName: config.sparseIndexName,
+    rerankModel: config.rerankModel,
+    defaultTopK: config.defaultTopK,
+    requestTimeoutMs: config.requestTimeoutMs,
   })
 );
 const server = await setupAllianceServer(config); // uses process-default ctx for migrated tools

@@ -43,6 +43,37 @@ describe('ServerContext', () => {
     expect(ctx.getConfig()).toEqual(config);
   });
 
+  it('setConfig clears client, namespaces cache, and suggest-flow', async () => {
+    const listA = vi
+      .fn()
+      .mockResolvedValue([{ namespace: 'a', recordCount: 1, metadata: { title: 'string' } }]);
+    const listB = vi
+      .fn()
+      .mockResolvedValue([{ namespace: 'b', recordCount: 2, metadata: { title: 'string' } }]);
+    const ctx = ServerContext.fromClient(testConfig(), {
+      listNamespacesWithMetadata: listA,
+    } as never);
+
+    ctx.markSuggested('wg21', {
+      recommended_tool: 'fast',
+      suggested_fields: ['title'],
+      user_query: 'contracts',
+    });
+    await ctx.getNamespacesWithCache();
+    expect((await ctx.getNamespacesWithCache()).cache_hit).toBe(true);
+    expect(ctx.requireSuggested('wg21').ok).toBe(true);
+
+    ctx.setConfig(resolveTestConfig({ indexName: 'other-index' }));
+    expect(() => ctx.getClientIfSet()).toThrow(/not initialized/);
+    expect(ctx.requireSuggested('wg21').ok).toBe(false);
+
+    ctx.setClient({ listNamespacesWithMetadata: listB } as never);
+    const afterConfigChange = await ctx.getNamespacesWithCache();
+    expect(afterConfigChange.cache_hit).toBe(false);
+    expect(listA).toHaveBeenCalledOnce();
+    expect(listB).toHaveBeenCalledOnce();
+  });
+
   it('requireSuggested bypasses gate when disableSuggestFlow comes from resolved config', () => {
     const prevDisable = process.env['PINECONE_DISABLE_SUGGEST_FLOW'];
     const prevKey = process.env['PINECONE_API_KEY'];

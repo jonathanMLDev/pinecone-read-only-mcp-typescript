@@ -114,11 +114,15 @@ export function makeNamespaceCacheEntry(
  * Resolved config for tests: explicit credentials and suggest-flow **enabled**
  * so `PINECONE_DISABLE_SUGGEST_FLOW` in CI/env cannot bypass the gate.
  */
+/** Stable TTL (seconds) for tests — overrides env `PINECONE_CACHE_TTL_SECONDS`. */
+const TEST_CACHE_TTL_SECONDS = 3600;
+
 export function resolveTestConfig(overrides: ConfigOverrides = {}): ServerConfig {
   return resolveConfig({
     apiKey: 'sk-test',
     indexName: 'test-index',
     disableSuggestFlow: false,
+    cacheTtlSeconds: TEST_CACHE_TTL_SECONDS,
     ...overrides,
   });
 }

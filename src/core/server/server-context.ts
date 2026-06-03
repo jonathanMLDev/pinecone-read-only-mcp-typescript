@@ -73,6 +73,14 @@ export class ServerContext {
 
   setConfig(config: ServerConfig): void {
     this.configValue = config;
+    this.invalidateConfigDerivedState();
+  }
+
+  /** Drop client, namespace cache, and suggest-flow tied to a previous config. */
+  private invalidateConfigDerivedState(): void {
+    this.client = null;
+    this.namespacesCache = null;
+    this.suggestionFlow.clear();
   }
 
   setClient(client: PineconeClient): void {
