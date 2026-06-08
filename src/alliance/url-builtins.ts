@@ -2,6 +2,7 @@
  * C++ Alliance domain-specific URL generators (Boost mailing list, Slack).
  */
 
+import type { ServerContext } from '../core/server/server-context.js';
 import { registerUrlGenerator } from '../core/server/url-registry.js';
 import type { UrlGenerationResult } from '../core/server/url-registry.js';
 
@@ -62,7 +63,8 @@ export function generatorSlackCpplang(metadata: Record<string, unknown>): UrlGen
   };
 }
 
-let builtinGeneratorsRegistered = false;
+const builtinGeneratorsRegisteredContexts = new WeakSet<ServerContext>();
+let defaultBuiltinGeneratorsRegistered = false;
 
 /** Options for {@link registerBuiltinUrlGenerators}. */
 export type RegisterBuiltinUrlGeneratorsOptions = {
@@ -73,18 +75,58 @@ export type RegisterBuiltinUrlGeneratorsOptions = {
   reinstallBuiltins?: boolean;
 };
 
-/**
- * Register built-in Alliance generators (`mailing`, `slack-Cpplang`).
- */
-export function registerBuiltinUrlGenerators(options?: RegisterBuiltinUrlGeneratorsOptions): void {
+function registerBuiltinsOnContext(ctx: ServerContext): void {
+  ctx.registerUrlGenerator('mailing', generatorMailing);
+  ctx.registerUrlGenerator('slack-Cpplang', generatorSlackCpplang);
+}
+
+function isServerContext(value: unknown): value is ServerContext {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    typeof (value as ServerContext).getConfig === 'function' &&
+    typeof (value as ServerContext).generateUrlForNamespace === 'function'
+  );
+}
+
+function registerBuiltinsOnDefaultContext(options?: RegisterBuiltinUrlGeneratorsOptions): void {
   if (options?.reinstallBuiltins) {
     registerUrlGenerator('mailing', generatorMailing);
     registerUrlGenerator('slack-Cpplang', generatorSlackCpplang);
-    builtinGeneratorsRegistered = true;
+    defaultBuiltinGeneratorsRegistered = true;
     return;
   }
-  if (builtinGeneratorsRegistered) return;
+  if (defaultBuiltinGeneratorsRegistered) return;
   registerUrlGenerator('mailing', generatorMailing);
   registerUrlGenerator('slack-Cpplang', generatorSlackCpplang);
-  builtinGeneratorsRegistered = true;
+  defaultBuiltinGeneratorsRegistered = true;
+}
+
+/** Register built-in Alliance generators on the process-default context (legacy). */
+export function registerBuiltinUrlGenerators(
+  options?: RegisterBuiltinUrlGeneratorsOptions
+): void;
+/** Register built-in Alliance generators on the given {@link ServerContext}. */
+export function registerBuiltinUrlGenerators(
+  ctx: ServerContext,
+  options?: RegisterBuiltinUrlGeneratorsOptions
+): void;
+export function registerBuiltinUrlGenerators(
+  ctxOrOptions?: ServerContext | RegisterBuiltinUrlGeneratorsOptions,
+  options?: RegisterBuiltinUrlGeneratorsOptions
+): void {
+  if (isServerContext(ctxOrOptions)) {
+    const ctx = ctxOrOptions;
+    if (options?.reinstallBuiltins) {
+      registerBuiltinsOnContext(ctx);
+      builtinGeneratorsRegisteredContexts.add(ctx);
+      return;
+    }
+    if (builtinGeneratorsRegisteredContexts.has(ctx)) return;
+    registerBuiltinsOnContext(ctx);
+    builtinGeneratorsRegisteredContexts.add(ctx);
+    return;
+  }
+
+  registerBuiltinsOnDefaultContext(ctxOrOptions);
 }

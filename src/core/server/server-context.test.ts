@@ -146,4 +146,22 @@ describe('ServerContext', () => {
     const fresh = getDefaultServerContext();
     expect(fresh).not.toBeNull();
   });
+
+  it('requireSuggested returns expiry message after TTL on instance context', () => {
+    vi.useFakeTimers();
+    const ctx = new ServerContext(resolveTestConfig({ cacheTtlSeconds: 1 }));
+    ctx.markSuggested('wg21', {
+      recommended_tool: 'fast',
+      suggested_fields: ['title'],
+      user_query: 'contracts',
+    });
+    expect(ctx.requireSuggested('wg21').ok).toBe(true);
+    vi.advanceTimersByTime(2000);
+    const expired = ctx.requireSuggested('wg21');
+    expect(expired.ok).toBe(false);
+    if (!expired.ok) {
+      expect(expired.message).toMatch(/expired/);
+    }
+    vi.useRealTimers();
+  });
 });

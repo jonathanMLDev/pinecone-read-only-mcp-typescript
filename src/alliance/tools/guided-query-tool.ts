@@ -229,6 +229,7 @@ export function registerGuidedQueryTool(server: McpServer, ctx?: ServerContext):
         const formattedResults = formatQueryResultRows(queryOutcome.results, {
           namespace,
           enrichUrls: enrich_urls,
+          ctx,
         });
         const result: QueryResponse = {
           status: 'success',

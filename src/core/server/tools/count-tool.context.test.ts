@@ -48,4 +48,22 @@ describe('count tool handler (ServerContext instance path)', () => {
     const err = assertToolErrorCode(raw, 'FLOW_GATE');
     expect(err.suggestion).toBe("Call suggest_query_params for namespace 'wg21' first");
   });
+
+  it('succeeds without prior suggest when disableSuggestFlow is true', async () => {
+    const count = vi.fn().mockResolvedValue({ count: 2, truncated: false });
+    const ctx = createTestServerContext({
+      config: { disableSuggestFlow: true },
+      client: { count } as never,
+    });
+    const server = createMockServer();
+    registerCountTool(server as never, ctx);
+    const body = parseToolJson(
+      await server.getHandler('count')!({
+        namespace: 'wg21',
+        query_text: 'how many',
+      })
+    );
+    expect(body['status']).toBe('success');
+    expect(count).toHaveBeenCalledOnce();
+  });
 });

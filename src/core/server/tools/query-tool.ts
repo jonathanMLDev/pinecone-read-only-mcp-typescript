@@ -69,7 +69,7 @@ async function executeQuery(params: QueryExecParams, ctx?: ServerContext) {
       fields: fields?.length ? fields : undefined,
     });
 
-    const formattedResults = formatQueryResultRows(queryOutcome.results);
+    const formattedResults = formatQueryResultRows(queryOutcome.results, { ctx });
 
     const response: QueryResponse = {
       status: 'success',
