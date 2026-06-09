@@ -7,6 +7,7 @@ import type { ServerContext } from '../../core/server/server-context.js';
 import { markSuggested } from '../../core/server/suggestion-flow.js';
 import {
   classifyToolCatchError,
+  lifecycleToolError,
   logToolError,
   validationToolError,
 } from '../../core/server/tool-error.js';
@@ -37,6 +38,9 @@ export function registerSuggestQueryParamsTool(server: McpServer, ctx?: ServerCo
     },
     async (params) => {
       try {
+        if (ctx?.disposed) {
+          return jsonErrorResponse(lifecycleToolError('ServerContext has been disposed'));
+        }
         const { namespace, user_query } = params;
         if (!user_query?.trim()) {
           return jsonErrorResponse(validationToolError('user_query cannot be empty', 'user_query'));

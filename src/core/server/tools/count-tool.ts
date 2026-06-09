@@ -8,6 +8,7 @@ import { requireSuggested } from '../suggestion-flow.js';
 import {
   classifyToolCatchError,
   flowGateToolError,
+  lifecycleToolError,
   logToolError,
   validationToolError,
 } from '../tool-error.js';
@@ -30,6 +31,9 @@ type CountExecParams = {
 
 async function executeCount(params: CountExecParams, ctx?: ServerContext) {
   try {
+    if (ctx?.disposed) {
+      return jsonErrorResponse(lifecycleToolError('ServerContext has been disposed'));
+    }
     const { namespace, query_text, metadata_filter } = params;
     const nsNorm = normalizeNamespace(namespace);
     if (!nsNorm) {
