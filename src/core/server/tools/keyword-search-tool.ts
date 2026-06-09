@@ -87,6 +87,7 @@ async function executeKeywordSearch(
 
   const formattedResults = formatQueryResultRows(results, {
     namespace: normalizedNamespace,
+    ctx,
   });
 
   const response: KeywordSearchResponse = {

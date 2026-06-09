@@ -5,7 +5,15 @@
 
 import type { PineconeMetadataValue, SearchResult } from '../../types.js';
 import { warn as logWarn } from '../../logger.js';
+import type { ServerContext } from './server-context.js';
 import { generateUrlForNamespace } from './url-registry.js';
+
+export type FormatQueryResultOptions = {
+  namespace?: string;
+  enrichUrls?: boolean;
+  contentMaxLength?: number;
+  ctx?: ServerContext;
+};
 
 const DEFAULT_CONTENT_MAX_LENGTH = 2000;
 
@@ -53,17 +61,15 @@ export function resetPaperNumberDeprecationLatchForTests(): void {
  */
 export function formatSearchResultAsRow(
   doc: SearchResult,
-  options?: {
-    namespace?: string;
-    enrichUrls?: boolean;
-    contentMaxLength?: number;
-  }
+  options?: FormatQueryResultOptions
 ): QueryResultRow {
   const contentMaxLength = options?.contentMaxLength ?? DEFAULT_CONTENT_MAX_LENGTH;
   const metadata = { ...doc.metadata } as Record<string, PineconeMetadataValue>;
 
   if (options?.enrichUrls && options?.namespace) {
-    const generated = generateUrlForNamespace(options.namespace, metadata);
+    const generated = options.ctx
+      ? options.ctx.generateUrlForNamespace(options.namespace, metadata)
+      : generateUrlForNamespace(options.namespace, metadata);
     const existingUrl = metadata['url'];
     const urlIsBlank = typeof existingUrl !== 'string' || existingUrl.trim() === '';
     if (generated.url && urlIsBlank) {
@@ -105,11 +111,7 @@ export function formatSearchResultAsRow(
  */
 export function formatQueryResultRows(
   results: SearchResult[],
-  options?: {
-    namespace?: string;
-    enrichUrls?: boolean;
-    contentMaxLength?: number;
-  }
+  options?: FormatQueryResultOptions
 ): QueryResultRow[] {
   return results.map((doc) => formatSearchResultAsRow(doc, options));
 }

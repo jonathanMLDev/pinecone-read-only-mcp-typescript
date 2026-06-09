@@ -19,7 +19,7 @@ export async function setupAllianceServer(config?: ServerConfig): Promise<McpSer
     instructions: ALLIANCE_SERVER_INSTRUCTIONS,
   });
   const ctx = getDefaultServerContext();
-  registerBuiltinUrlGenerators();
+  registerBuiltinUrlGenerators(ctx);
   registerSuggestQueryParamsTool(server, ctx);
   registerGuidedQueryTool(server, ctx);
   return server;
