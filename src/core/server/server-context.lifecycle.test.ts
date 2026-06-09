@@ -4,11 +4,7 @@ import { resolveConfig } from '../config.js';
 import { setPineconeClient } from '../server/client-context.js';
 import { setupCoreServer, teardownServer } from '../setup.js';
 import { resolveTestConfig } from './tools/test-helpers.js';
-import {
-  ServerContext,
-  createServer,
-  teardownDefaultServerContext,
-} from './server-context.js';
+import { ServerContext, createServer, teardownDefaultServerContext } from './server-context.js';
 
 describe('ServerContext lifecycle', () => {
   afterEach(() => {
