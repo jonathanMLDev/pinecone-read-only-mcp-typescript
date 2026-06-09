@@ -59,8 +59,41 @@ export function redactApiKey(s: string): string {
     /[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/g,
     '***'
   );
+  out = out.replace(/pcsk_[A-Za-z0-9_-]{40,}/g, '***');
   out = out.replace(/(api[_-]?key["':\s=]+)([^\s"',}]+)/gi, '$1***');
   out = out.replace(/(Authorization:\s*Bearer\s+)([^\s"',}]+)/gi, '$1***');
+  return out;
+}
+
+/** MCP response keys whose string values may carry SDK errors or credentials. */
+const SENSITIVE_RESPONSE_KEYS = new Set(['message', 'suggestion', 'degradation_reason']);
+
+/**
+ * Recursively redact sensitive string fields in MCP tool payloads.
+ * Only keys in {@link SENSITIVE_RESPONSE_KEYS} are masked; other strings (e.g. document UUIDs in metadata) are preserved.
+ */
+export function redactSensitiveFields(
+  value: unknown,
+  seen: WeakSet<object> = new WeakSet()
+): unknown {
+  if (value === null || value === undefined) return value;
+  if (typeof value !== 'object') return value;
+
+  if (seen.has(value as object)) return '[Circular]';
+  seen.add(value as object);
+
+  if (Array.isArray(value)) {
+    return value.map((item) => redactSensitiveFields(item, seen));
+  }
+
+  const out: Record<string, unknown> = {};
+  for (const [key, nested] of Object.entries(value as Record<string, unknown>)) {
+    if (typeof nested === 'string' && SENSITIVE_RESPONSE_KEYS.has(key)) {
+      out[key] = redactApiKey(nested);
+    } else {
+      out[key] = redactSensitiveFields(nested, seen);
+    }
+  }
   return out;
 }
 

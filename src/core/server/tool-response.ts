@@ -1,3 +1,4 @@
+import { redactSensitiveFields } from '../../logger.js';
 import type { ToolError } from './tool-error.js';
 import { toolErrorSchema } from './tool-error.js';
 
@@ -8,11 +9,12 @@ export type TextPayload = {
 
 /** Build an MCP tool success payload with JSON-stringified content. */
 export function jsonResponse(payload: unknown): TextPayload {
+  const safe = redactSensitiveFields(payload);
   return {
     content: [
       {
         type: 'text',
-        text: JSON.stringify(payload, null, 2),
+        text: JSON.stringify(safe, null, 2),
       },
     ],
   };
@@ -21,12 +23,13 @@ export function jsonResponse(payload: unknown): TextPayload {
 /** Build an MCP tool error payload with JSON-stringified {@link ToolError} and isError: true. */
 export function jsonErrorResponse(err: ToolError): TextPayload {
   const validated = toolErrorSchema.parse(err);
+  const safe = redactSensitiveFields(validated) as ToolError;
   return {
     isError: true,
     content: [
       {
         type: 'text',
-        text: JSON.stringify(validated, null, 2),
+        text: JSON.stringify(safe, null, 2),
       },
     ],
   };

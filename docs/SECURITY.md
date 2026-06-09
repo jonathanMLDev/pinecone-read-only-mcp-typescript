@@ -10,10 +10,17 @@
 `src/logger.ts` implements `redactApiKey` and recursive redaction for structured log data:
 
 - UUID-shaped tokens (`xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`) → `***`
+- Modern Pinecone keys (`pcsk_…`) → `***`
 - Substrings after `apiKey` / `api_key` / similar patterns → masked
 - `Authorization: Bearer …` tokens → masked
 
 Logs go to **stderr**; use `PINECONE_READ_ONLY_MCP_LOG_FORMAT=json` for pipelines and ensure downstream sinks treat stderr as sensitive.
+
+## MCP response redaction
+
+Tool responses returned to MCP clients (and LLM consumers) are sanitized in `src/core/server/tool-response.ts` via `redactSensitiveFields()` before JSON serialization. Only known sensitive keys are masked (`message`, `suggestion`, `degradation_reason`); document metadata UUIDs and other non-sensitive fields are preserved.
+
+This covers tool error payloads, hybrid degradation reasons, and SDK error text surfaced in DEBUG log mode — not only stderr logs.
 
 ## Docker image
 
