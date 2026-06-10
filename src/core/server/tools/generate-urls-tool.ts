@@ -3,7 +3,12 @@ import { z } from 'zod';
 import { normalizeNamespace } from '../namespace-utils.js';
 import type { ServerContext } from '../server-context.js';
 import { generateUrlForNamespace } from '../url-registry.js';
-import { classifyToolCatchError, logToolError, validationToolError } from '../tool-error.js';
+import {
+  classifyToolCatchError,
+  lifecycleToolError,
+  logToolError,
+  validationToolError,
+} from '../tool-error.js';
 import { jsonErrorResponse, jsonResponse } from '../tool-response.js';
 
 /** Get metadata from a record (either record.metadata or the record itself). */
@@ -39,6 +44,9 @@ export function registerGenerateUrlsTool(server: McpServer, ctx?: ServerContext)
     },
     async (params) => {
       try {
+        if (ctx?.disposed) {
+          return jsonErrorResponse(lifecycleToolError('ServerContext has been disposed'));
+        }
         const { namespace, records } = params;
         const nsNorm = normalizeNamespace(namespace);
         if (!nsNorm) {

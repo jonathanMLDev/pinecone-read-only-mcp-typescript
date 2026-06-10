@@ -17,6 +17,7 @@ import { suggestQueryParams } from '../../core/server/query-suggestion.js';
 import { markSuggested } from '../../core/server/suggestion-flow.js';
 import {
   classifyToolCatchError,
+  lifecycleToolError,
   logToolError,
   pineconeToolError,
   validationToolError,
@@ -82,6 +83,9 @@ export function registerGuidedQueryTool(server: McpServer, ctx?: ServerContext):
     },
     async (params) => {
       try {
+        if (ctx?.disposed) {
+          return jsonErrorResponse(lifecycleToolError('ServerContext has been disposed'));
+        }
         const {
           user_query,
           namespace: inputNamespace,

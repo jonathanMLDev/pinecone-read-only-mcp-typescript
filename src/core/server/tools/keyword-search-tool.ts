@@ -6,7 +6,12 @@ import { formatQueryResultRows } from '../format-query-result.js';
 import type { ServerContext } from '../server-context.js';
 import { metadataFilterSchema, validateMetadataFilterDetailed } from '../metadata-filter.js';
 import type { ToolError } from '../tool-error.js';
-import { classifyToolCatchError, logToolError, validationToolError } from '../tool-error.js';
+import {
+  classifyToolCatchError,
+  lifecycleToolError,
+  logToolError,
+  validationToolError,
+} from '../tool-error.js';
 import { jsonErrorResponse, jsonResponse } from '../tool-response.js';
 
 /** Success response shape for keyword_search (aligned with query tool fields). */
@@ -47,6 +52,9 @@ async function executeKeywordSearch(
   },
   ctx?: ServerContext
 ): Promise<KeywordSearchExecResult> {
+  if (ctx?.disposed) {
+    return { ok: false, error: lifecycleToolError('ServerContext has been disposed') };
+  }
   const { query_text, namespace, top_k, metadata_filter, fields } = params;
 
   const normalizedQuery = query_text.trim();

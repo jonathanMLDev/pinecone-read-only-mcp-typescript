@@ -11,6 +11,7 @@ import { requireSuggested } from '../suggestion-flow.js';
 import {
   classifyToolCatchError,
   flowGateToolError,
+  lifecycleToolError,
   logToolError,
   validationToolError,
 } from '../tool-error.js';
@@ -32,6 +33,9 @@ type QueryExecParams = {
 async function executeQuery(params: QueryExecParams, ctx?: ServerContext) {
   const { query_text, namespace, top_k, use_reranking, metadata_filter, fields, mode } = params;
   try {
+    if (ctx?.disposed) {
+      return jsonErrorResponse(lifecycleToolError('ServerContext has been disposed'));
+    }
     if (!query_text.trim()) {
       return jsonErrorResponse(validationToolError('Query text cannot be empty', 'query_text'));
     }

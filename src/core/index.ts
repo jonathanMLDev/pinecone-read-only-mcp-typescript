@@ -41,4 +41,4 @@ export type {
   HybridQueryResult,
   HybridLegFailed,
 } from '../types.js';
-export { setupCoreServer, teardownServer } from './setup.js';
+export { setupCoreServer, teardownServer, type ServerHandle } from './setup.js';

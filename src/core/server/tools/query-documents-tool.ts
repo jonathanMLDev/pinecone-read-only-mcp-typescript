@@ -14,6 +14,7 @@ import { requireSuggested } from '../suggestion-flow.js';
 import {
   classifyToolCatchError,
   flowGateToolError,
+  lifecycleToolError,
   logToolError,
   validationToolError,
 } from '../tool-error.js';
@@ -74,6 +75,9 @@ export function registerQueryDocumentsTool(server: McpServer, ctx?: ServerContex
     },
     async (params) => {
       try {
+        if (ctx?.disposed) {
+          return jsonErrorResponse(lifecycleToolError('ServerContext has been disposed'));
+        }
         const {
           query_text,
           namespace,

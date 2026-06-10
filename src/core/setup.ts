@@ -18,6 +18,9 @@ import { registerQueryTool } from './server/tools/query-tool.js';
 
 let mcpServerInitialized = false;
 
+/** MCP server handle with automatic teardown via `await using`. */
+export type ServerHandle = McpServer & AsyncDisposable;
+
 /**
  * Reset process-global MCP server state (suggest-flow, namespace cache, active config,
  * Pinecone client handle, URL generator registry). Call before a second {@link setupCoreServer}.
@@ -42,7 +45,7 @@ export type SetupCoreServerOptions = {
 export async function setupCoreServer(
   config?: ServerConfig,
   options?: SetupCoreServerOptions
-): Promise<McpServer> {
+): Promise<ServerHandle> {
   if (mcpServerInitialized) {
     throw new Error(
       'setupCoreServer() already called in this process. The MCP server uses process-global state (suggest-flow, namespace cache, URL generators, config). Call teardownServer() first if you need to re-initialize.'
@@ -83,6 +86,14 @@ export async function setupCoreServer(
   registerQueryDocumentsTool(server, ctx);
   registerGenerateUrlsTool(server, ctx);
 
+  const handle = server as ServerHandle;
+  handle[Symbol.asyncDispose] = async () => {
+    try {
+      await ctx[Symbol.asyncDispose]();
+    } finally {
+      mcpServerInitialized = false;
+    }
+  };
   mcpServerInitialized = true;
-  return server;
+  return handle;
 }

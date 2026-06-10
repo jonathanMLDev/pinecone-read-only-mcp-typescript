@@ -3,7 +3,12 @@ import { z } from 'zod';
 import { getNamespacesWithCache } from '../namespaces-cache.js';
 import { rankNamespacesByQuery } from '../namespace-router.js';
 import type { ServerContext } from '../server-context.js';
-import { classifyToolCatchError, logToolError, validationToolError } from '../tool-error.js';
+import {
+  classifyToolCatchError,
+  lifecycleToolError,
+  logToolError,
+  validationToolError,
+} from '../tool-error.js';
 import { jsonErrorResponse, jsonResponse } from '../tool-response.js';
 
 /** Register the namespace_router tool on the MCP server. */
@@ -29,6 +34,9 @@ export function registerNamespaceRouterTool(server: McpServer, ctx?: ServerConte
     },
     async (params) => {
       try {
+        if (ctx?.disposed) {
+          return jsonErrorResponse(lifecycleToolError('ServerContext has been disposed'));
+        }
         const { user_query, top_n } = params;
         if (!user_query?.trim()) {
           return jsonErrorResponse(validationToolError('user_query cannot be empty', 'user_query'));

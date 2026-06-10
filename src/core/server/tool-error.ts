@@ -17,7 +17,13 @@ export function logToolError(toolName: string, error: unknown): void {
   logError(`Error in ${toolName} tool`, error);
 }
 
-export const toolErrorCodeSchema = z.enum(['FLOW_GATE', 'VALIDATION', 'PINECONE_ERROR', 'TIMEOUT']);
+export const toolErrorCodeSchema = z.enum([
+  'FLOW_GATE',
+  'VALIDATION',
+  'PINECONE_ERROR',
+  'TIMEOUT',
+  'LIFECYCLE',
+]);
 export type ToolErrorCode = z.infer<typeof toolErrorCodeSchema>;
 
 const flowGateToolErrorSchema = z.object({
@@ -49,11 +55,19 @@ const timeoutToolErrorSchema = z.object({
   suggestion: z.string().optional(),
 });
 
+const lifecycleToolErrorSchema = z.object({
+  code: z.literal('LIFECYCLE'),
+  message: z.string(),
+  recoverable: z.literal(false),
+  suggestion: z.string().optional(),
+});
+
 export const toolErrorSchema = z.discriminatedUnion('code', [
   flowGateToolErrorSchema,
   validationToolErrorSchema,
   pineconeToolErrorSchema,
   timeoutToolErrorSchema,
+  lifecycleToolErrorSchema,
 ]);
 
 export type ToolError = z.infer<typeof toolErrorSchema>;
@@ -104,6 +118,14 @@ export function timeoutToolError(message: string, options?: { suggestion?: strin
     message,
     recoverable: true,
     suggestion: options?.suggestion ?? DEFAULT_TIMEOUT_SUGGESTION,
+  };
+}
+
+export function lifecycleToolError(message: string): ToolError {
+  return {
+    code: 'LIFECYCLE',
+    message,
+    recoverable: false,
   };
 }
 

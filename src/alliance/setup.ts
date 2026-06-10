@@ -1,9 +1,8 @@
-import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { ALLIANCE_SERVER_INSTRUCTIONS } from '../constants.js';
 import type { ServerConfig } from '../core/config.js';
 import { getDefaultServerContext } from '../core/server/server-context.js';
 import { resolveAllianceConfig } from './config.js';
-import { setupCoreServer } from '../core/setup.js';
+import { setupCoreServer, type ServerHandle } from '../core/setup.js';
 import { registerBuiltinUrlGenerators } from './url-builtins.js';
 import { registerGuidedQueryTool } from './tools/guided-query-tool.js';
 import { registerSuggestQueryParamsTool } from './tools/suggest-query-params-tool.js';
@@ -14,7 +13,7 @@ import { registerSuggestQueryParamsTool } from './tools/suggest-query-params-too
  *
  * When `config` is omitted, resolves env via {@link resolveAllianceConfig} (Alliance index/rerank defaults when unset).
  */
-export async function setupAllianceServer(config?: ServerConfig): Promise<McpServer> {
+export async function setupAllianceServer(config?: ServerConfig): Promise<ServerHandle> {
   const server = await setupCoreServer(config ?? resolveAllianceConfig({}), {
     instructions: ALLIANCE_SERVER_INSTRUCTIONS,
   });

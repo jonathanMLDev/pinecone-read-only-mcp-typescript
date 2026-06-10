@@ -43,7 +43,8 @@ function buildPineconeClient(config: ServerConfig): PineconeClient {
  * Encapsulates per-server state: Pinecone client, config, URL registry,
  * suggest-flow gate, and namespaces cache.
  */
-export class ServerContext {
+export class ServerContext implements AsyncDisposable {
+  disposed = false;
   private client: PineconeClient | null = null;
   private configValue: ServerConfig | null = null;
   private readonly urlGenerators = new Map<string, UrlGeneratorFn>();
@@ -257,11 +258,20 @@ export class ServerContext {
 
   /** Clear all encapsulated state (client handle, caches, registries). */
   teardown(): void {
+    this.disposed = true;
     this.client = null;
     this.configValue = null;
     this.urlGenerators.clear();
     this.suggestionFlow.clear();
     this.namespacesCache = null;
+  }
+
+  async [Symbol.asyncDispose](): Promise<void> {
+    this.teardown();
+    if (defaultContext === this) {
+      defaultContext = null;
+      pendingConfig = null;
+    }
   }
 }
 

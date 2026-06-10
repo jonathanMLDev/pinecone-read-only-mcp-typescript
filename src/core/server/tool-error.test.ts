@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   classifyToolCatchError,
   flowGateToolError,
+  lifecycleToolError,
   toolErrorSchema,
   validationToolError,
 } from './tool-error.js';
@@ -35,6 +36,14 @@ describe('ToolError schema and builders', () => {
     expect(err.code).toBe('PINECONE_ERROR');
     expect(err.recoverable).toBe(false);
     expect(toolErrorSchema.parse(err).code).toBe('PINECONE_ERROR');
+  });
+
+  it('LIFECYCLE: not recoverable and parses', () => {
+    const err = lifecycleToolError('ServerContext has been disposed');
+    const parsed = toolErrorSchema.parse(err);
+    expect(parsed.code).toBe('LIFECYCLE');
+    expect(parsed.recoverable).toBe(false);
+    expect(parsed.message).toContain('disposed');
   });
 
   it('TIMEOUT: classifyToolCatchError matches withTimeout message prefix', () => {
