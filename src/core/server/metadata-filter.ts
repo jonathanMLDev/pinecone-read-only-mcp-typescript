@@ -27,6 +27,9 @@ const ALLOWED_FILTER_OPERATORS = new Set([
   '$or',
 ]);
 
+/** Maximum nested filter-record depth ($and/$or combinator layers). Depth 10 passes; 11 rejects. */
+export const MAX_FILTER_DEPTH = 10;
+
 export type MetadataFilterValidationError = {
   message: string;
   /** Dot-path to the failing segment (metadata key and/or operator chain). */
@@ -42,6 +45,7 @@ function isPrimitiveFilterValue(value: unknown): boolean {
 function isPrimitiveArray(value: unknown): boolean {
   return (
     Array.isArray(value) &&
+    value.length > 0 &&
     value.every((item) => ['string', 'number', 'boolean'].includes(typeof item))
   );
 }
@@ -50,10 +54,16 @@ function err(message: string, path: string[]): MetadataFilterValidationError {
   return { message, field: path.join('.') };
 }
 
+function combinatorAt(path: string[]): string | undefined {
+  const op = path[path.length - 1];
+  return op === '$and' || op === '$or' ? op : undefined;
+}
+
 /** Recursively validate a filter value; returns an error or null if valid. */
 function validateMetadataFilterValue(
   value: unknown,
-  path: string[]
+  path: string[],
+  depth: number
 ): MetadataFilterValidationError | null {
   if (value === null || value === undefined) {
     return err(`Invalid null/undefined at "${path.join('.')}".`, path);
@@ -64,6 +74,13 @@ function validateMetadataFilterValue(
   }
 
   if (Array.isArray(value)) {
+    const combinator = combinatorAt(path);
+    if (combinator !== undefined && value.length === 0) {
+      return err(
+        `Operator "${combinator}" at "${path.join('.')}" must contain at least one filter object.`,
+        path
+      );
+    }
     for (let i = 0; i < value.length; i++) {
       const item = value[i];
       if (typeof item !== 'object' || item === null || Array.isArray(item)) {
@@ -72,7 +89,7 @@ function validateMetadataFilterValue(
           [...path, String(i)]
         );
       }
-      const nestedError = validateMetadataFilterRecord(item as Record<string, unknown>);
+      const nestedError = validateMetadataFilterRecord(item as Record<string, unknown>, depth + 1);
       if (nestedError) return nestedError;
     }
     return null;
@@ -95,11 +112,25 @@ function validateMetadataFilterValue(
         [...path, key]
       );
     }
-    if ((key === '$in' || key === '$nin') && !isPrimitiveArray(nestedValue)) {
-      return err(
-        `Operator "${key}" at "${path.join('.')}" must use an array of primitive values.`,
-        [...path, key]
-      );
+    if (key === '$in' || key === '$nin') {
+      if (!Array.isArray(nestedValue)) {
+        return err(
+          `Operator "${key}" at "${path.join('.')}" must use an array of primitive values.`,
+          [...path, key]
+        );
+      }
+      if (nestedValue.length === 0) {
+        return err(`Operator "${key}" at "${path.join('.')}" must contain at least one value.`, [
+          ...path,
+          key,
+        ]);
+      }
+      if (!isPrimitiveArray(nestedValue)) {
+        return err(
+          `Operator "${key}" at "${path.join('.')}" must use an array of primitive values.`,
+          [...path, key]
+        );
+      }
     }
     if (
       (key === '$eq' ||
@@ -121,8 +152,18 @@ function validateMetadataFilterValue(
         key,
       ]);
     }
+    if (
+      (key === '$and' || key === '$or') &&
+      Array.isArray(nestedValue) &&
+      nestedValue.length === 0
+    ) {
+      return err(
+        `Operator "${key}" at "${path.join('.')}" must contain at least one filter object.`,
+        [...path, key]
+      );
+    }
 
-    const nestedError = validateMetadataFilterValue(nestedValue, [...path, key]);
+    const nestedError = validateMetadataFilterValue(nestedValue, [...path, key], depth);
     if (nestedError) {
       return nestedError;
     }
@@ -132,10 +173,17 @@ function validateMetadataFilterValue(
 }
 
 function validateMetadataFilterRecord(
-  filter: Record<string, unknown>
+  filter: Record<string, unknown>,
+  depth = 0
 ): MetadataFilterValidationError | null {
+  if (depth > MAX_FILTER_DEPTH) {
+    return {
+      message: `Filter nesting exceeds maximum depth of ${MAX_FILTER_DEPTH}.`,
+      field: '',
+    };
+  }
   for (const [field, value] of Object.entries(filter)) {
-    const error = validateMetadataFilterValue(value, [field]);
+    const error = validateMetadataFilterValue(value, [field], depth);
     if (error) return error;
   }
   return null;

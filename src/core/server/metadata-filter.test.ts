@@ -50,4 +50,45 @@ describe('validateMetadataFilterDetailed', () => {
     });
     expect(d!.field).toBe('tags.$or.0');
   });
+
+  it('accepts filter at maximum nesting depth', () => {
+    expect(validateMetadataFilterDetailed({ x: deepAnd(10) })).toBeNull();
+  });
+
+  it('rejects filter exceeding maximum nesting depth', () => {
+    const d = validateMetadataFilterDetailed({ x: deepAnd(11) });
+    expect(d).not.toBeNull();
+    expect(d!.message).toContain('maximum depth');
+    expect(d!.field).toBe('');
+  });
+
+  it('rejects empty $and at top level', () => {
+    const d = validateMetadataFilterDetailed({ $and: [] });
+    expect(d!.field).toBe('$and');
+    expect(d!.message).toContain('at least one filter object');
+  });
+
+  it('rejects empty $or at top level', () => {
+    const d = validateMetadataFilterDetailed({ $or: [] });
+    expect(d!.field).toBe('$or');
+    expect(d!.message).toContain('at least one filter object');
+  });
+
+  it('rejects empty $in', () => {
+    const d = validateMetadataFilterDetailed({ tags: { $in: [] } });
+    expect(d!.field).toBe('tags.$in');
+    expect(d!.message).toContain('at least one value');
+  });
+
+  it('rejects empty $nin', () => {
+    const d = validateMetadataFilterDetailed({ tags: { $nin: [] } });
+    expect(d!.field).toBe('tags.$nin');
+    expect(d!.message).toContain('at least one value');
+  });
 });
+
+/** Build a filter nested `levels` deep via $and combinators. */
+function deepAnd(levels: number): Record<string, unknown> {
+  if (levels === 0) return { leaf: { $eq: 1 } };
+  return { $and: [deepAnd(levels - 1)] };
+}
