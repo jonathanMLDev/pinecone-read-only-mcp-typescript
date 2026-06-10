@@ -24,9 +24,7 @@ describe('setup multi-instance (phase 4)', () => {
     const ctxB = createTestServerContext({ config: cfgB });
 
     await expect(setupCoreServer({ context: ctxA, config: cfgA })).resolves.toBeDefined();
-    await expect(
-      setupAllianceServer({ context: ctxB, config: cfgB })
-    ).resolves.toBeDefined();
+    await expect(setupAllianceServer({ context: ctxB, config: cfgB })).resolves.toBeDefined();
   });
 
   it('isolates URL registry between instances', async () => {
@@ -74,12 +72,12 @@ describe('setup multi-instance (phase 4)', () => {
 
   it('isolates namespaces cache between instances', async () => {
     isolateFromDefaultContext();
-    const listNsA = vi.fn().mockResolvedValue([
-      { namespace: 'wg21', recordCount: 10, metadata: { source: 'a' } },
-    ]);
-    const listNsB = vi.fn().mockResolvedValue([
-      { namespace: 'other', recordCount: 5, metadata: { source: 'b' } },
-    ]);
+    const listNsA = vi
+      .fn()
+      .mockResolvedValue([{ namespace: 'wg21', recordCount: 10, metadata: { source: 'a' } }]);
+    const listNsB = vi
+      .fn()
+      .mockResolvedValue([{ namespace: 'other', recordCount: 5, metadata: { source: 'b' } }]);
     const cfgA = resolveTestConfig({ apiKey: 'cache-iso-a' });
     const cfgB = resolveTestConfig({ apiKey: 'cache-iso-b' });
     const ctxA = createTestServerContext({
@@ -117,14 +115,18 @@ describe('setup multi-instance (phase 4)', () => {
 
   it('await using disposes only the bound context; another instance can still setup', async () => {
     isolateFromDefaultContext();
-    const ctxA = createTestServerContext({ config: resolveTestConfig({ apiKey: 'await-using-a' }) });
+    const ctxA = createTestServerContext({
+      config: resolveTestConfig({ apiKey: 'await-using-a' }),
+    });
     {
       await using _handle = await setupCoreServer({ context: ctxA });
       expect(ctxA.disposed).toBe(false);
     }
     expect(ctxA.disposed).toBe(true);
 
-    const ctxB = createTestServerContext({ config: resolveTestConfig({ apiKey: 'await-using-b' }) });
+    const ctxB = createTestServerContext({
+      config: resolveTestConfig({ apiKey: 'await-using-b' }),
+    });
     await expect(setupCoreServer({ context: ctxB })).resolves.toBeDefined();
     expect(ctxB.disposed).toBe(false);
   });
