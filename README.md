@@ -125,7 +125,9 @@ Run `pinecone-read-only-mcp --help` for CLI equivalents (`--cache-ttl-seconds`, 
 
 ### Deployment model
 
-Each **`ServerContext`** owns its own suggest-flow gate, namespaces cache, URL generator registry, and config. **Stdio MCP (one client per Node process)** typically uses one context. For **multi-tenant HTTP** embedding, create one `ServerContext` per session and pass it explicitly to `setupAllianceServer({ config, context: ctx })` or `setupCoreServer({ config, context: ctx })`.
+Each **`ServerContext`** owns its own suggest-flow gate, namespaces cache, URL generator registry, and config. **Stdio MCP (one client per Node process)** typically uses one context. For **multi-tenant HTTP** embedding, create one `ServerContext` per session and pass it explicitly to `setupAllianceServer({ context: ctx })` or `setupCoreServer({ context: ctx })`.
+
+Pass `config` at setup only when the context is not yet configured; after `createServer` + `setClient`, pass `{ context: ctx }` only.
 
 Legacy module getters (`setPineconeClient`, `registerUrlGenerator`, etc.) still delegate to a process-default context when you omit `context` at setup.
 
@@ -140,10 +142,10 @@ Legacy module getters (`setPineconeClient`, `registerUrlGenerator`, etc.) still 
 const config = resolveAllianceConfig({ apiKey: '...' });
 const ctx = createServer(config);
 ctx.setClient(new PineconeClient({ /* ... */ }));
-const server = await setupAllianceServer({ config, context: ctx });
+const server = await setupAllianceServer({ context: ctx });
 ```
 
-Use **`await using server = await setupAllianceServer({ config, context: ctx })`** for automatic teardown, or call **`ctx.teardown()`** when done. For legacy single-server flows that rely on the process-default context, **`teardownServer()`** resets that default before re-initializing.
+Use **`await using server = await setupAllianceServer({ context: ctx })`** for automatic teardown, or call **`ctx.teardown()`** when done. For legacy single-server flows that rely on the process-default context, **`teardownServer()`** resets that default before re-initializing.
 
 For the **generic bridge only**, see [examples/quickstart/mcp-demo.ts](examples/quickstart/mcp-demo.ts). For the **full Alliance surface**, see [examples/alliance/library-embedding-demo.ts](examples/alliance/library-embedding-demo.ts) and [docs/TOOLS.md](docs/TOOLS.md#suggest-flow-gate).
 
@@ -173,7 +175,7 @@ ctx.setClient(
     rerankModel: config.rerankModel,
   })
 );
-const server = await setupAllianceServer({ config, context: ctx });
+const server = await setupAllianceServer({ context: ctx });
 
 const myDocs: UrlGeneratorFn = (metadata): UrlGenerationResult => {
   const id = typeof metadata.doc_id === 'string' ? metadata.doc_id : null;

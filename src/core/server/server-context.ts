@@ -93,6 +93,11 @@ export class ServerContext implements AsyncDisposable {
     this.client = null;
   }
 
+  /** Whether a Pinecone client was explicitly set (does not lazy-build from config). */
+  hasInjectedClient(): boolean {
+    return this.client !== null;
+  }
+
   /** Return the client only when explicitly set (legacy {@link getPineconeClient} path). */
   getClientIfSet(): PineconeClient {
     if (!this.client) {

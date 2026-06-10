@@ -4,7 +4,7 @@
  * Pinecone Read-Only MCP CLI entry point.
  *
  * Thin composition root: parseCli() -> resolveAllianceConfig() -> createServer(config)
- * -> ctx.setClient(...) -> setupAllianceServer({ config, context: ctx }) -> connect to stdio transport.
+ * -> ctx.setClient(...) -> setupAllianceServer({ context: ctx }) -> connect to stdio transport.
  */
 
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
@@ -89,7 +89,7 @@ async function main(): Promise<void> {
     }
     process.stderr.write(`Log level: ${config.logLevel} (format: ${config.logFormat})\n`);
 
-    const server = await setupAllianceServer({ config, context: ctx });
+    const server = await setupAllianceServer({ context: ctx });
     const transport = new StdioServerTransport();
     await server.connect(transport);
 

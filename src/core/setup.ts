@@ -53,7 +53,15 @@ function isServerConfig(value: unknown): value is ServerConfig {
 }
 
 function isSetupCoreServerOptions(value: unknown): value is SetupCoreServerOptions {
-  return typeof value === 'object' && value !== null && !isServerConfig(value);
+  if (typeof value !== 'object' || value === null || isServerConfig(value)) {
+    return false;
+  }
+  for (const key of Object.keys(value as Record<string, unknown>)) {
+    if (key !== 'config' && key !== 'context' && key !== 'instructions') {
+      return false;
+    }
+  }
+  return true;
 }
 
 function normalizeSetupCoreServerArgs(
@@ -69,12 +77,18 @@ function normalizeSetupCoreServerArgs(
   if (isSetupCoreServerOptions(configOrOptions)) {
     return { ...configOrOptions, ...legacyOptions };
   }
-  return legacyOptions ?? {};
+  throw new TypeError('configOrOptions must be a ServerConfig or SetupCoreServerOptions');
 }
 
 function resolveSetupContext(opts: SetupCoreServerOptions): ServerContext {
   if (opts.context) {
     if (opts.config) {
+      if (opts.context.hasInjectedClient()) {
+        throw new Error(
+          'Passing both config and context clears an injected Pinecone client. ' +
+            'Omit config when reusing a pre-configured context, or call setClient() after setup.'
+        );
+      }
       opts.context.setConfig(opts.config);
     }
     return opts.context;

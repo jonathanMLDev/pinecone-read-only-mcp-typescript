@@ -4,11 +4,14 @@
  * Instance-first pattern (mirrors `src/index.ts`):
  *   1. `resolveAllianceConfig({ apiKey, indexName, ... })` — Alliance index/rerank defaults when unset.
  *   2. `createServer(config)` → `ctx.setClient(new PineconeClient({ ... }))`.
- *   3. `await setupAllianceServer({ config, context: ctx })` then `server.connect(transport)`.
+ *   3. `await setupAllianceServer({ context: ctx })` then `server.connect(transport)`.
+ *
+ * Pass `config` at setup only when the context is not yet configured; after
+ * `createServer` + `setClient`, pass `{ context: ctx }` only.
  *
  * **Multi-instance:** pass a distinct `ServerContext` per tenant/session. Each context
  * owns its own suggest-flow state, namespaces cache, and URL registry. Use
- * `await using server = await setupAllianceServer({ config, context: ctx })` for
+ * `await using server = await setupAllianceServer({ context: ctx })` for
  * automatic teardown, or call `ctx.teardown()` when done.
  *
  * **Legacy (single process-default server):** `setPineconeClient(client)` then
@@ -41,7 +44,7 @@ async function main(): Promise<void> {
     })
   );
 
-  const server = await setupAllianceServer({ config, context: ctx });
+  const server = await setupAllianceServer({ context: ctx });
   // const transport = new StdioServerTransport();
   // await server.connect(transport);
   void server;

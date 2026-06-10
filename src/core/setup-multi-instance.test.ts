@@ -23,8 +23,8 @@ describe('setup multi-instance (phase 4)', () => {
     const ctxA = createTestServerContext({ config: cfgA });
     const ctxB = createTestServerContext({ config: cfgB });
 
-    await expect(setupCoreServer({ context: ctxA, config: cfgA })).resolves.toBeDefined();
-    await expect(setupAllianceServer({ context: ctxB, config: cfgB })).resolves.toBeDefined();
+    await expect(setupCoreServer({ context: ctxA })).resolves.toBeDefined();
+    await expect(setupAllianceServer({ context: ctxB })).resolves.toBeDefined();
   });
 
   it('isolates URL registry between instances', async () => {
@@ -34,8 +34,8 @@ describe('setup multi-instance (phase 4)', () => {
     const ctxA = createTestServerContext({ config: cfgA });
     const ctxB = createTestServerContext({ config: cfgB });
 
-    await setupCoreServer({ context: ctxA, config: cfgA });
-    await setupAllianceServer({ context: ctxB, config: cfgB });
+    await setupCoreServer({ context: ctxA });
+    await setupAllianceServer({ context: ctxB });
 
     const metadata = { doc_id: MAILING_DOC_ID };
     const fromA = ctxA.generateUrlForNamespace('mailing', metadata);
@@ -54,8 +54,8 @@ describe('setup multi-instance (phase 4)', () => {
     const ctxA = createTestServerContext({ config: cfgA });
     const ctxB = createTestServerContext({ config: cfgB });
 
-    await setupCoreServer({ context: ctxA, config: cfgA });
-    await setupCoreServer({ context: ctxB, config: cfgB });
+    await setupCoreServer({ context: ctxA });
+    await setupCoreServer({ context: ctxB });
 
     ctxA.markSuggested('wg21', {
       recommended_tool: 'fast',

@@ -51,8 +51,10 @@ ctx.setClient(
     requestTimeoutMs: config.requestTimeoutMs,
   })
 );
-const server = await setupAllianceServer({ config, context: ctx });
+const server = await setupAllianceServer({ context: ctx });
 ```
+
+Pass `config` at setup only when the context is not yet configured; after `createServer` + `setClient`, pass `{ context: ctx }` only.
 
 **Core-only setup** (seven tools, no Alliance builtins):
 
@@ -62,7 +64,7 @@ import { createServer, PineconeClient, resolveConfig, setupCoreServer } from '@w
 const config = resolveConfig({ apiKey: '...', indexName: 'my-index' });
 const ctx = createServer(config);
 ctx.setClient(new PineconeClient({ /* ... */ }));
-const server = await setupCoreServer({ config, context: ctx });
+const server = await setupCoreServer({ context: ctx });
 ```
 
 **Multi-instance:** run multiple `ServerContext` instances in one process by passing a distinct `context` to each setup call. Use `await using` on the returned `ServerHandle` or `ctx.teardown()` per session. Legacy `teardownServer()` resets only the process-default context.

@@ -2,7 +2,7 @@ import { ALLIANCE_SERVER_INSTRUCTIONS } from '../constants.js';
 import type { ServerConfig } from '../core/config.js';
 import { getDefaultServerContext, type ServerContext } from '../core/server/server-context.js';
 import { resolveAllianceConfig } from './config.js';
-import { setupCoreServer, type ServerHandle } from '../core/setup.js';
+import { setupCoreServer, type ServerHandle, type SetupCoreServerOptions } from '../core/setup.js';
 import { registerBuiltinUrlGenerators } from './url-builtins.js';
 import { registerGuidedQueryTool } from './tools/guided-query-tool.js';
 import { registerSuggestQueryParamsTool } from './tools/suggest-query-params-tool.js';
@@ -27,7 +27,15 @@ function isServerConfig(value: unknown): value is ServerConfig {
 }
 
 function isSetupAllianceServerOptions(value: unknown): value is SetupAllianceServerOptions {
-  return typeof value === 'object' && value !== null && !isServerConfig(value);
+  if (typeof value !== 'object' || value === null || isServerConfig(value)) {
+    return false;
+  }
+  for (const key of Object.keys(value as Record<string, unknown>)) {
+    if (key !== 'config' && key !== 'context' && key !== 'instructions') {
+      return false;
+    }
+  }
+  return true;
 }
 
 function normalizeSetupAllianceArgs(
@@ -43,7 +51,7 @@ function normalizeSetupAllianceArgs(
   if (isSetupAllianceServerOptions(configOrOptions)) {
     return { ...configOrOptions, ...legacyOptions };
   }
-  return legacyOptions ?? {};
+  throw new TypeError('configOrOptions must be a ServerConfig or SetupAllianceServerOptions');
 }
 
 /**
@@ -58,19 +66,19 @@ export async function setupAllianceServer(
 ): Promise<ServerHandle> {
   const opts = normalizeSetupAllianceArgs(configOrOptions, legacyOptions);
   const instructions = opts.instructions ?? ALLIANCE_SERVER_INSTRUCTIONS;
-  const config = opts.config ?? resolveAllianceConfig({});
 
   let server: ServerHandle;
   let resolvedCtx: ServerContext;
 
   if (opts.context) {
     resolvedCtx = opts.context;
-    server = await setupCoreServer({
-      config: opts.config ?? config,
-      context: resolvedCtx,
-      instructions,
-    });
+    const coreOpts: SetupCoreServerOptions = { context: resolvedCtx, instructions };
+    if (opts.config !== undefined) {
+      coreOpts.config = opts.config;
+    }
+    server = await setupCoreServer(coreOpts);
   } else {
+    const config = opts.config ?? resolveAllianceConfig({});
     server = await setupCoreServer({
       config: opts.config ?? config,
       instructions,
