@@ -12,7 +12,10 @@ import {
   logToolError,
   validationToolError,
 } from '../tool-error.js';
-import { keywordSearchResponseSchema, type KeywordSearchResponse } from '../response-schemas.js';
+import {
+  keywordSearchSuccessResponseSchema,
+  type KeywordSearchResponse,
+} from '../response-schemas.js';
 import { jsonErrorResponse, validatedJsonResponse } from '../tool-response.js';
 
 /** @deprecated Import {@link KeywordSearchResponse} from `response-schemas` or package root. */
@@ -143,7 +146,7 @@ export function registerKeywordSearchTool(server: McpServer, ctx?: ServerContext
         if (!result.ok) {
           return jsonErrorResponse(result.error);
         }
-        return validatedJsonResponse(keywordSearchResponseSchema, result.body);
+        return validatedJsonResponse(keywordSearchSuccessResponseSchema, result.body);
       } catch (error) {
         logToolError('keyword_search', error);
         return jsonErrorResponse(classifyToolCatchError(error, 'Keyword search failed'));

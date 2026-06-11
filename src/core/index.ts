@@ -22,10 +22,12 @@ export {
   generateUrlsResponseSchema,
   guidedQueryResponseSchema,
   keywordSearchResponseSchema,
+  keywordSearchSuccessResponseSchema,
   listNamespacesResponseSchema,
   namespaceRouterResponseSchema,
   queryDocumentsResponseSchema,
   queryResponseSchema,
+  querySuccessResponseSchema,
   queryResultRowSchema,
   suggestQueryParamsResponseSchema,
 } from './server/response-schemas.js';
@@ -35,10 +37,12 @@ export type {
   GuidedQueryDecisionTrace,
   GuidedQueryResponse,
   KeywordSearchResponse,
+  KeywordSearchSuccessResponse,
   ListNamespacesSuccessResponse,
   NamespaceRouterResponse,
   QueryDocumentsResponse,
   QueryExperimental,
+  QuerySuccessResponse,
   SuggestQueryParamsResponse,
 } from './server/response-schemas.js';
 export { suggestQueryParams } from './server/query-suggestion.js';

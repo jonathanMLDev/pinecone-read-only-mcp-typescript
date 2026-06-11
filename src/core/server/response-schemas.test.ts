@@ -4,11 +4,13 @@ import {
   generateUrlsResponseSchema,
   guidedQueryResponseSchema,
   keywordSearchResponseSchema,
+  keywordSearchSuccessResponseSchema,
   listNamespacesResponseSchema,
   namespaceRouterResponseSchema,
   queryDocumentsResponseSchema,
   queryResponseSchema,
   queryResultRowSchema,
+  querySuccessResponseSchema,
   suggestQueryParamsResponseSchema,
 } from './response-schemas.js';
 
@@ -37,7 +39,7 @@ describe('response-schemas', () => {
     ).toBeDefined();
   });
 
-  it('accepts query response with experimental degradation fields', () => {
+  it('accepts permissive query response with experimental degradation fields only', () => {
     expect(
       queryResponseSchema.parse({
         status: 'success',
@@ -49,6 +51,38 @@ describe('response-schemas', () => {
         },
       })
     ).toBeDefined();
+  });
+
+  it('accepts strict query success response with experimental degradation fields', () => {
+    expect(
+      querySuccessResponseSchema.parse({
+        status: 'success',
+        mode: 'query_fast',
+        query: 'q',
+        namespace: 'wg21',
+        result_count: 0,
+        results: [],
+        experimental: {
+          degraded: true,
+          degradation_reason: 'rerank_failed: timeout',
+          hybrid_leg_failed: 'dense',
+          rerank_skipped_reason: 'no_model',
+        },
+      })
+    ).toBeDefined();
+  });
+
+  it('rejects strict query success response missing stable fields', () => {
+    expect(() =>
+      querySuccessResponseSchema.parse({
+        status: 'success',
+        experimental: { degraded: true },
+      })
+    ).toThrow();
+  });
+
+  it('rejects strict keyword search success response missing stable fields', () => {
+    expect(() => keywordSearchSuccessResponseSchema.parse({ status: 'success' })).toThrow();
   });
 
   it('rejects query response missing status', () => {

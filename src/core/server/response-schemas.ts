@@ -84,6 +84,21 @@ export const queryResponseSchema = z.object({
 
 export type QueryResponse = z.infer<typeof queryResponseSchema>;
 
+/** Strict handler-boundary schema for `query` / `query_fast` / `query_detailed` success payloads. */
+export const querySuccessResponseSchema = z.object({
+  status: z.literal('success'),
+  mode: z.enum(['query', 'query_fast', 'query_detailed']),
+  query: z.string(),
+  namespace: z.string(),
+  metadata_filter: z.record(z.string(), z.unknown()).optional(),
+  result_count: z.number(),
+  fields: z.array(z.string()).optional(),
+  results: z.array(queryResultRowSchema),
+  experimental: queryExperimentalSchema.optional(),
+});
+
+export type QuerySuccessResponse = z.infer<typeof querySuccessResponseSchema>;
+
 export const listNamespacesResponseSchema = z.object({
   status: z.literal('success'),
   cache_hit: z.boolean(),
@@ -146,6 +161,20 @@ export const keywordSearchResponseSchema = z.object({
 
 /** @deprecated Import from `response-schemas` / package root; alias kept for one minor cycle. */
 export type KeywordSearchResponse = z.infer<typeof keywordSearchResponseSchema>;
+
+/** Strict handler-boundary schema for `keyword_search` success payloads. */
+export const keywordSearchSuccessResponseSchema = z.object({
+  status: z.literal('success'),
+  query: z.string(),
+  namespace: z.string(),
+  index: z.string(),
+  metadata_filter: z.record(z.string(), z.unknown()).optional(),
+  result_count: z.number(),
+  results: z.array(queryResultRowSchema),
+  fields: z.array(z.string()).optional(),
+});
+
+export type KeywordSearchSuccessResponse = z.infer<typeof keywordSearchSuccessResponseSchema>;
 
 const queryDocumentRowSchema = z.object({
   document_id: z.string(),
