@@ -226,7 +226,7 @@ If split proceeds later, publish a **compatibility period**:
 
 Keep one git repository; add workspace packages:
 
-```
+```text
 pinecone-read-only-mcp-typescript/
   package.json                 # workspace root (private)
   packages/
@@ -289,7 +289,7 @@ Continue with `exports["."]` and `exports["./alliance"]` in one package.
 
 ### Recommended: **Split later** (not now)
 
-Defer the npm package split until **after phase 5 legacy-getter deprecation** has shipped and **one deprecation policy window** has elapsed (see [deprecation-policy.md](./deprecation-policy.md).
+Defer the npm package split until **after phase 5 legacy-getter deprecation** has shipped and **one deprecation policy window** has elapsed (see [deprecation-policy.md](./deprecation-policy.md)).
 
 Do **not** implement workspace packages in the current sprint. This PR delivers the evaluation only.
 
