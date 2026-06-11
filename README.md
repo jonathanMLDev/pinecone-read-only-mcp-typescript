@@ -184,7 +184,7 @@ A fuller embedding sample lives in [examples/alliance/custom-url-generator.ts](e
 | File | Description |
 | ---- | ----------- |
 | [examples/alliance/suggest-flow-demo.ts](examples/alliance/suggest-flow-demo.ts) | Manual **suggest_query_params → query** flow |
-| [examples/alliance/guided-query-demo.ts](examples/alliance/guided-query-demo.ts) | **guided_query** and `decision_trace` |
+| [examples/alliance/guided-query-demo.ts](examples/alliance/guided-query-demo.ts) | **guided_query** and `experimental.decision_trace` |
 | [examples/alliance/library-embedding-demo.ts](examples/alliance/library-embedding-demo.ts) | **setupAllianceServer** without the CLI |
 | [examples/alliance/custom-url-generator.ts](examples/alliance/custom-url-generator.ts) | Custom **URL generator** registration |
 
@@ -410,7 +410,7 @@ Single orchestrator tool that runs the full flow in one call:
 2. query param suggestion,
 3. execution via `count` or hybrid `query` (`fast` / `detailed` / `full` presets).
 
-It returns both the final result and a `decision_trace` for transparency.
+It returns both the final result and `experimental.decision_trace` for transparency.
 
 **Parameters:**
 
@@ -423,7 +423,7 @@ It returns both the final result and a `decision_trace` for transparency.
 | `preferred_tool`  | enum    | No       | `auto`  | One of `auto`, `count`, `fast`, `detailed`, `full`                                  |
 | `enrich_urls`     | boolean | No       | `true`  | Auto-generate URLs for `mailing` and `slack-Cpplang` when `metadata.url` is missing |
 
-**Returns:** JSON containing `decision_trace` and `result`.
+**Returns:** JSON containing `experimental.decision_trace` and `result`.
 
 ### `generate_urls`
 
