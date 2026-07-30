@@ -45,7 +45,11 @@ coverage/
 
 # Misc
 .npmrc
+.temp/
+.tmp/
+cursor_logs/
 
 # Scripts
 scripts/*.bat
 scripts/*.sh
+scripts/fix-core-imports.mjs
